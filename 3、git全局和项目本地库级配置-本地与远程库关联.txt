@@ -1,0 +1,117 @@
+        git实现了ssh协议（即git可以和xshell等一样用 ssh协议 来跨网络通信），git使用ssh协议公私钥身份认证以登陆工蜂服务器，相应的公私钥文件、known_hosts（是存放工
+蜂服务器ip的，表明用户让客户端信任该ip服务端，一般在首次克隆远程库到本地时git命令行会自动保存该信任ip并提示 Warning: Permanently added the RSA host key for IP 
+address '20.205.243.166' to the list of known hosts.）等内容在~/.ssh中。理所当然地，git clone、git pull、git push 等跨网络操作工蜂上某个repository的过程，也都是被保
+护在ssh协议内加密进行的。
+        而git配置文件 ~/.gitconfig 或 每个项目中的 .git/config 中的内容则是直接和工蜂上某些或某个repository对应的，确认用户是否有使用该repository的权限的。
+
+
+
+ ------------==全局级别配置 ~/.gitconfig==------------
+
+0、git的全局配置.gitconfig中的内容是直接和工蜂上某些 repository 对应的，用于确认用户是否有使用该若干 repository 的权限及操作远程库 repository 的设置等。
+
+1、设置或修改全局级别账户
+     git config --global user.name  xxx    设置全局级别的用户名
+     git config --global user.email  xxxx      设置全局级别的邮箱【并非必须是真邮箱，只是用于区分】
+     //设置全局的账户信息（user.name  user.email)后，会自动在宿主机的系统的用户家目录~下生成  .gitconfig文件，（也可手动通过git窗口用touch命令创建 .gitconfig 这个文件） 
+     //进去看会发现内中记录了git的全局账户信息（即可以管理各个项目project的git本地库的账户，对应着工蜂上各个repository的访问账户）。
+
+2、查看全局.gitconfig【也可以直接cd ~/.gitconfig 文件中cat查看，或点开~/.gitconfig查看】
+     git config --global --list	显示全局config	即~家目录下的.gitconfig文件的内容
+
+3、删除全局设置	【也可以点击进去直接手动删除】
+     git config --global --unset xxx    将全局设置中的xxx删除 即删除~家目录中的.gitconfig中的xxx及其对应的值
+
+4、以上增查改删操作也可直接打开 ~/.gitconfig 文件 手动进行。
+
+	一个~/.gitconfig 文件内容常常是这样的：
+	[user]
+	name=ck
+	email=ck@qq.com
+	[url "git@git.code.oa.com:"]
+	insteadOf  = http://git.code.oa.com/	//在git clone http://git.code.oa.com/xxxrepository 时默认转为 git@git.code.oa.com:xxx repository 
+	[url "git@git.code.oa.com:"]
+	insteadOf  = https://git.code.oa.com/
+
+5、【注意！！！】如果遇到类似这样的报错： Permission to clarence-zhetanchiye/shiyishi.git denied to clarence-secai  表明是当前账户信息和Github上远程库的账户不一致
+可到   控制面板-用户账户和家庭安全-凭据管理器-普通凭据处删除缓存的普通凭据信息，再重新操作。
+
+
+
+ ------------==项目级别配置 .git/config【通过克隆】==------------
+
+1、克隆远程库到本地	【远程仓库网址httpxxx.git 在工蜂上页面中 HTTPS SSH 对应的搜索框里，或Github上的绿色Code按钮内】
+   git  clone  远程某仓库网址httpxxx.git		克隆一个远程库（包括所有分支及各个分支的版本栈）到本地，并默认进入master分支。
+					---完成克隆后该项目里就会有一个.git文件，其内即暂存区和本地库所在地，含有远程库的完整版本栈。
+					---且自动创建了该远程库网址 httpxxx.git 的别名origin，并记录到了当前目录下 .git/config 文件中【可以点进去查看】。
+
+|1.1、git clone -o 自定义远程库网址别名originck  远程仓库网址httpsxxx.git      
+|         			和上一个一样，只是将默认的远程库网址httpsxxx.git 的默认别名origin 改为自定义的originck，并记录到本项目的本地库 .git/config 文件中。
+|
+|1.2、克隆远程库并进入指定分支
+|       git clone -b xxx  httpxxx.git      			将远程库中的所有分支（包括各个分支的版本栈）下载到本地当前目录下，并进入xxx分支。其他分支通过 
+|						命令 git branch -a 查看会发现是红色，只有 xxx 是绿色。
+|
+|1.3、克隆远程库master分支的特定版本(远程库版本栈中的最新版本)
+|       git clone --depth=1  httpxxx.git			只将远程库master分支的最新版本下载到本地当前目录，这样做的好处是可以节省下载时间，减少占据本地的空间。
+|						以后可以像完整克隆那样推送，不会因为本地库缺一些历史版本而导致推送后远程库也丢失历史版本。
+|
+|1.4、克隆远程库的特定分支的特定版本(远程库版本栈中的最新版本)
+|       git clone --depth=1 -b xxx  httpxxx.git			将远程库的分支xxx的版本栈中的仅最新版本下载到本地【这些 - 或 -- 的参数是可以搭配的】
+
+
+2、查看本地远程库网址别名【也可进入.git/config文件中查看，常是origin】
+      git remote -v   						显示本地存在的远程仓库网址和对应的别名
+
+|2.1、修改本地远程库网址别名  【也可以进入  .git/config  手动修改】
+|     git remote rename 远程库网址别名originck  自定义别名newweb    	将本地库 .git/config 中记录的远程库网址别名originck 改为newweb
+|
+|2.2、删除本地远程库网址别名【也可以进入  .git/config  手动删除】
+|     git remote rm 本地库中自定义的远程库网址别名originck		删除本地库  .git/config  中记录的当初自定义的originck这个别名和对应的远程库网址
+
+
+3、克隆到本地后，本地库和远程库之间天然就是对应的，因此接下来就可以 add commit pull push 等。
+
+
+
+ ------------==项目级别配置 .git/config【通过init】==------------（也可以直接先新建远程库，然后克隆该空远程库，虽然会警告但仍会成功）
+
+1、初始化
+     git init 			在本地创建项目的目录下执行 git init 命令后，会自动生成一个 .git 文件，其内就是暂存区和本地库所在地，能以版本栈的形式跟踪本地的add、commit，
+			生成的.git/config文件是配置文件，用户设置项目project级别（当前本地库级别）的user.name  user.email 时   用户名 邮箱 会写进该文件，可进去查看
+
+2、新建远程库
+     先在Github主页上新建一个repository，获得仓库的网址httpxxx.git 。
+
+3、git remote add 自定义远程库网址别名originck  httpxxx.git          	
+						添加远程仓库网址 httpxxx.git（如https://github.com/clarence/test.git或git@git.oa.com:clarence/test.git）
+						到本地库的 .git/config 配置文件或本地主机用户家目录下的.gitconfig配置文件，并给该仓库网址起别名为originck
+
+4、开始工作并 add commit 
+     在生成的.git文件的平级位置创建该项目的内容开始工作编辑，然后跟踪进 .git 内的暂存区和本地库中
+					              
+5、git push 远程仓库网址别名originck  本地库分支master	将本地库的master分支推送到已自定义名为 originck 对应的远程仓库网址上，作为远程库上最新版本内容，
+						由于此时远程库还是空的，所以不用先pull再push，因为可以认为本地的该版本就是基于远程库的空版本修改的
+
+0.0、
+     git init  
+        后
+     git pull httpsxxx.git  xxx分支
+        这样就可以把远程库 httpsxxx.git上的xxx分支克隆到本地的当前目录下。【但会发现git remote -v 没有内容，故最好还是直接克隆 git clone httpsxxx.git】
+
+0、查看项目级别config【也可以直接cd 到config文件文件中cat查看，或点开查看】
+     git config --local --list		显示当前目录下的config  即当前目录下.git本地库中config文件的内容
+     查看账户
+     git config user.name		显示当前账户的用户名
+     git config user.email		显示当前账户的邮箱
+
+0、设置或修改项目级别账户【也可以点击进去直接编辑】
+     git config user.name  xxx		在当前目录下设置该目录下项目project的本地库级别的用户名
+     git config user.email  xxxx         	在当前目录下设置该目录下项目project的本地库级别的邮箱【并非必须是真邮箱，只是用于区分用户】
+
+0、删除设置	【也可以点击进去直接手动删除】
+     git config --local --unset xxx    	即删除 .git/config 中的xxx及其对应的值
+
+
+
+（完）

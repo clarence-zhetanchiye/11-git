@@ -1,0 +1,94 @@
+***************************************************总结***************************************************
+1、当我的本地修改期间，如果远程库发送了修改，即在此期间别人又拉取远程库、修改、推送了，远程库有了新的版本，也即我在本地的修改不是基于远程库的最新版本了，
+那么我在把自己修改的commit到本地库后，推送到远程库之前需要pull一下，从而将别人的修改作为基础，我的修改基于其上，从而达到我的修改仍然是基于远程库最新的
+版本的目的。【看似是将别人的修改合并到我的内容中来，版本栈上其实是别人的修改版本是在栈的下面，我的修改版本是在它的上面】
+
+2、pull合并会有两种情形，【当然，如果我本地修改期间远程库没发生任何变化，那么pull就不会有什么事情发生】一种是合并不冲突的情况，即既保留别人的修改，也保留
+自己的修改；另一种是合并发生冲突，即当别人的修改和我的修改修改的是同一个地方时，pull合并后我的git终端会出现conflict说明，且进入(master|MERGING)，同时我的
+工作区的内容会出现合并冲突的痕迹，即有HEAD和===及>>>，其中HEAD和===之间的就是我的内容，===和>>>之间的就是别人的内容，这时需要手动予以取舍处理，
+然后再次add和commit形成最新版本号，最后无需pull直接push推送【因为此时的版本已经是基于远程库最新版本之上的修改】。
+【如果pull的时候弹出了vim，则自己写进vim的说明将作为最后推送远程库后远程库的说明】。
+
+3、pull完全等价于 fetch 后 merge。
+
+*******************************************************示例过程*******************************************************
+主子提交  四行诗句
+git commit -m "主子commit 1.txt" 1.txt
+并推送到远程库
+
+奴才clone后，增加了两个标题和作者
+git commit -m "奴才添加了两个标题和作者" 1.txt
+并推送到远程库
+
+在此期间，主子在本地最初版本的四句诗的基础上，添加了赏析
+git commit -m "主子添加了赏析" 1.txt
+为了成功推送，主子pull拉取合并了奴才添加的标题和作者，并在弹出的vim中写上    “主子添加了赏析后，拉取奴才添加了标题和作者的版本”
+此时由于不存在合并冲突，因此git终端上并没有conflict说明，分支情况也不会是(master|merge)
+最后完成推送
+
+结果是远程库上的说明是  “主子添加了赏析后，拉取奴才添加了标题和作者的版本”   
+远程库上的版本内容和主子本地库的版本内容是一致的，都是两个标题和作者   四句诗  赏析
+
+-------
+
+小奴才clone，给第一个没书名号的标题加上了书名号  
+git commit -m "给第一个标题加上了书名号" 1.txt     
+并推送到远程库
+
+
+在此期间，主子在本地内容中删掉了第一个没书名号的标题， 
+git commit -m "主子删除了第一个没书名号的标题" 1.txt   
+并pull拉取合并了小奴才的操作
+
+结果是pull操作并未弹出vim，但git终端有conflict说明，同时终端进入(master|MERGING) ，且主子的工作区的文件内容中出现了如下内容
+其中，<< HEAD和===之间的部分就是主子的操作，>>>c48d9和===之间的部分就是小奴才的操作，即删掉第一个无书名号标题而导致的留下的空白行
+
+<<<<<<< HEAD
+
+=======
+《一去二三里》
+>>>>>>> c48d952b4a21ad1592e5f1aa403bf0eec5a8143e
+
+主子在工作区手动处理了上面的冲突后，再次add 和 commit，这样就有了最新版本，然后直接push【此时不用再pull了，因为已经pull过了】推送到远程库
+
+*****************************************git中的展示如下*******************************************
+主子的git终端
+$ git log --oneline
+832a600 (HEAD -> master) 合并冲突手动解决后提交。--主子删标题，奴才保标题加书名号
+6bfeff2 主子删除了第一个没书名号的标题
+c48d952 (wan_web/master) 给第一个标题加上了书名号
+19a3145 主子添加了赏析后，拉取奴才添加了标题和作者的版本Merge branch 'master' of https://github.com/clarence-zhetanchiye/wanyiwan
+af465e2 主子添加了赏析
+fdd7525 奴才添加了两个标题和作者
+6118b7d 主子commit 1.txt
+
+$ git reflog
+832a600 (HEAD -> master, wan_web/master) HEAD@{0}: commit (merge): 合并冲突手动解决后提交。--主子删标题，奴才保标题加书名号
+6bfeff2 HEAD@{1}: commit: 主子删除了第一个没书名号的标题
+19a3145 HEAD@{2}: pull wan_web master: Merge made by the 'recursive' strategy.
+af465e2 HEAD@{3}: commit: 主子添加了赏析
+6118b7d HEAD@{4}: commit (initial): 主子commit 1.txt
+*******************************************
+奴才的git终端
+$ git log --oneline
+fdd7525 (HEAD -> master, origin/master, origin/HEAD) 奴才添加了两个标题和作者
+6118b7d 主子commit 1.txt
+
+$ git reflog
+fdd7525 (HEAD -> master) HEAD@{0}: commit: 奴才添加了两个标题和作者
+6118b7d (origin/master, origin/HEAD) HEAD@{1}: clone: from https://github.com/clarence-zhetanchiye/wanyiwan.git
+*******************************************
+小奴才的git终端
+$ git log --oneline
+c48d952 (HEAD -> master) 给第一个标题加上了书名号
+19a3145 (origin/master, origin/HEAD) 主子添加了赏析后，拉取奴才添加了标题和作者的版本Merge branch 'master' of https://github.com/clarence-zhetanchiye/wanyiwan
+af465e2 主子添加了赏析
+fdd7525 奴才添加了两个标题和作者
+6118b7d 主子commit 1.txt
+
+$ git reflog
+c48d952 (HEAD -> master) HEAD@{0}: commit: 给第一个标题加上了书名号
+19a3145 (origin/master, origin/HEAD) HEAD@{1}: clone: from https://github.com/clarence-zhetanchiye/wanyiwan.git
+
+
+（完）

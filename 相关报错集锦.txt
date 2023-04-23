@@ -1,0 +1,44 @@
+==========
+报错：
+fatal: unable to access 'https://github.com/goSilver/daydayup.git/': error setting certificate verify locations: 
+CAfile: D:/dev/Git/mingw64/ssl/certs/ca-bundle.crt  CApath: none	【注意看dev】
+
+意思就是证书位置设置错误。git在安装时，配置文件里写的证书的路径和我实际的路径不一致了（可能是自己后来更
+改了文件夹名称等的原因，可以查看报错的路径和自己的实际路径），故报错证书位置设置错误。
+
+解决方法：把文件夹路径更改过来，保持和报错信息中的路径一致就可以了。
+解决方法二：更改git的系统配置，让系统去寻找证书的路径，和我的实际路径一致。
+	git config --system http.sslcainfo "D:\_dev\Git\mingw64\ssl\certs\ca-bundle.crt"   【注意看_dev】
+
+
+===========
+报错：
+The authenticity of host '192.168.244.205 (192.168.244.205)' can't be established.
+ED25519 key fingerprint is SHA256:qRKw/X1FgayYeYFFltWbBarLMMJURKL75Z21XAYYaGU.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? 
+
+解决办法：直接输入yes即可，这样就会在 ~/.ssh 下首次生成 known_hosts 文件。表示文件中的服务器是本客户端认为安全的。
+
+
+===========
+git如何关闭证书校验？
+关闭证书校验的命令：git config --system http.sslverify false 
+
+
+===========
+报错：
+Authentication failed for  。。。。
+执行  git config --system --unset credential.helper       之后再push就会提示输入名称和密码。
+
+
+
+===========
+
+git config --list     展示所有配置信息，比 .gitconfig 或项目下的 .git/config 里信息还要多。
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+使用实现了SSH协议的软件(如xhsell、git bash)登陆远程主机时，可以用默认的密码登陆方式，但需每次手动输入密码，比较麻烦；也可以用非对称密钥进行验证
+以允许登陆。使用非对称密钥登陆前需创建公私钥文件，创建的用户私钥文件放在本地，用于对返还给远程主机的验证信息签名，创建的用户公钥文件放在远程主机
+上，用于服务器验证签名以允许客户端登陆——服务器允许该客户端登陆的前提是验证该客户。
+密钥登陆的具体步骤为：
+	第一步，手动将客户端的用户公钥放入远程服务器的指定位置。（此指定位置常设置了权限，只有被允许的用户才能放置用户公钥）
+	第二步，客户端向服务器发起 SSH 登录的请求。
+	第三步，服务器收到用户 SSH 登录的请求，发送一些随机数据给用户，要求用户证明自己的身份。
+	第四步，客户端收到服务器发来的数据，使用用户私钥对数据进行签名，然后再发还给服务器。
+	第五步，服务器收到客户端发来的加密签名后，使用对应的用户公钥解密，然后跟原始数据比较完成对签名的验证。如果一致，就允许用户登录。
+
+以下是介绍Git、SVN创建SSH公钥的方法 
+
+操作步骤： 
+
+Step1： 访问https://git-scm.com/下载git客户端，，选择默认选项安装即可（可自定义安装路径）Git客户端安装完成后即可配置公钥私钥。
+
+Step2：点击鼠标右键，点击“Git Bash Here”,打开终端
+
+Step3：输入命令cd ~/.ssh，进入SSH配置，若出现/c/Users/v_mmweili/.ssh:No such file or directory，可手动在家目录~下创建.ssh文件夹并进入
+
+Step4：生成SSH公钥和私钥的文件，输入ssh-keygen -t rsa -C "XX@tencent.com"（此处为你的邮箱） 【-t 是指定公私钥所用标准为rsa，必须指定；-C是为密钥指定注释说明内容】
+	??此时会自动生成 ~/.gitconfig 文件，内中自动有
+	[user]
+	        email = xx@tencent.com
+	        name = xx
+
+**Step5：提示输入命名用户公钥和用户私钥的的文件名，这里我取名：id_rsa 
+Generating public/private rsa key pair. 
+Enter file in which to save the key (/c/Users/v_mmweili/.ssh/id_rsa): id_rsa 
+
+Step6：输入文件名后回车，第一次输入密码（直接回车不用输入）
+Enter passphrase (empty for no passphrase): 
+
+Step7：第二次输入密码（直接回车不用输入）
+Enter same passphrase again: 
+
+Step8：看到如下内容
+
+Step9：ls -l 下检查生成的SSH Key文件，看到.ssh目录下有id_rsa(用户私钥)和id_rsa.pub(用户公钥)两个文件，代表用户公私钥成功生成了，若没有，需要按照上面步骤重新生成
+
+Step10：若上述执行过程中，出现 Saving key "id_rsat" failed: Permission denied   则需要切换到root权限生成用户的公钥和私钥
+
+Step11:手动将用户公钥文件中的内容保存到服务器的 ~/.ssh/authorized_keys文件中(不存在时可手动创建) 或其他指定位置。这样就可以使用密钥登陆方式了。
+
+参见：https://wangdoc.com/ssh/key.html#ssh-key%E5%91%BD%E4%BB%A4%EF%BC%9A%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5
+
+（完）

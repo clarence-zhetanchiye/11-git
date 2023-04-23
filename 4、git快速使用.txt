@@ -1,0 +1,76 @@
+进入一个分支x后，此时工作区中的就是本地库中分支x的最新版本对应的内容。
+
+--------------------------------克隆并创建新分支开发----------------------------------
+//克隆远程库
+1、   git  clone  远程仓库网址httpxxx.git		//默认进入master分支
+
+//复制master内容到自己的新建分支，在新建分支上开发
+2.1、   git branch -a 	 			//显示所有分支。会发现各个分支是红色，可以通过 git checkout xx 进入到这些红色的分支，之后该分支就不再是红色
+2.2   git   branch      ck			//由当前所在分支创建新分支ck分支，ck分支内容和版本栈与master一致。注意新分支名不要与远程库已有分支名重复
+2.3    git  checkout   ck 			//进入新分支
+===git checkout -b ck   等价于上面两步
+
+//修改后提交到本分支的本地库
+3、git add .
+4、git commit -m "balabala"
+
+//提交这个新分支到远程库，让远程库出现这个新分支
+5、git remote -v 				//显示远程库网址别名的对应关系
+6、git push 远程库网址别名origin  ck		//远程库上多出来 ck 这个新分支
+
+
+--------------------------------克隆并在远程库已有分支上继续开发----------------------------------
+
+//克隆远程库
+1、   git  clone  远程仓库网址httpxxx.git		//默认进入master分支
+
+//切换到项目已有的某分支（克隆到本地的项目，拥有远程库上的所有分支）
+2、   git   branch -a				//显示所有分支，和远程库的所有分支一致
+3、   git   checkout  开发分支test		//切换到test分支。分支内容和远程库dev分支最新内容是一致的
+
+//修改后提交到本分支的本地库
+4、git add .
+5、git commit -m "balabala"
+
+//提交并推送
+6、git remote -v 				//显示远程库网址别名的对应关系
+7、git pull  远程库网址别名origin  开发分支test 	//让自己的开发是基于远程库test分支的最新内容的，若有冲突，手动处理
+8、git push 远程库网址别名origin  开发分支test	//让自己的开发成果显示在远程库test分支上的最新版本上。
+
+
+---------------------------------更新本地库master与远程库一致，再创建新分支开发-----------------------------
+//更新master分支
+1、git  checkout  master 
+2、git  pull  远程库网址别名origin  master
+
+//由master分支创建新分支并进入
+3、    git  branch ck
+3.1、 git  checkout ck 
+===git checkout -b ck   等价于上面两步
+
+//修改后提交到本分支的本地库
+4、git add .
+5、git commit -m "balabala"
+
+//提交这个新分支到远程库，让远程库出现这个新分支
+6、git remote -v 				//显示远程库网址别名的对应关系
+7、git push 远程库网址别名origin  ck		//远程库上多出来 ck 这个新分支
+
+
+---------------------------------更新本地库开发分支与远程库一致后继续开发-----------------------------
+//更新开发分支
+1、git  checkout  开发分支test  
+2、git  remote -v				//显示远程库网址别名的对应关系
+3、git  pull  远程库网址别名origin  开发分支test
+
+//修改后提交到本分支的本地库
+4、git add .
+5、git commit -m "balabala"
+
+//提交这个新分支到远程库，让远程库出现这个新分支
+6、git remote -v 				//显示远程库网址别名的对应关系
+7、git pull  远程库网址别名origin  开发分支test
+8、git push 远程库网址别名origin  开发分支test	//让自己的开发成果显示在远程库test分支上的最新版本上。
+
+
+（完）

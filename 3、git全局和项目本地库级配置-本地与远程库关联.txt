@@ -61,7 +61,7 @@ address '20.205.243.166' to the list of known hosts.）等内容在~/.ssh中。�
 
 
 2、查看本地远程库网址别名【也可进入.git/config文件中查看，常是origin】
-      git remote -v   						显示本地存在的远程仓库网址和对应的别名
+      git remote -v   						显示本地存在的远程仓库网址和对应的别名，这个别名通常就是origin
 
 |2.1、修改本地远程库网址别名  【也可以进入  .git/config  手动修改】
 |     git remote rename 远程库网址别名originck  自定义别名newweb    	将本地库 .git/config 中记录的远程库网址别名originck 改为newweb
